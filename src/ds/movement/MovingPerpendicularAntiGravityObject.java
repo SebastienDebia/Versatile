@@ -6,6 +6,7 @@ package ds.movement;
 import java.awt.geom.Point2D;
 
 import ds.Math2;
+import ds.targeting.IVirtualBot;
 
 /**
  * @author f4
@@ -15,20 +16,25 @@ public class MovingPerpendicularAntiGravityObject extends
 		MovingAntiGravityObject
 {
 
+	private IVirtualBot m_originBot;
+
 	/**
+	 * @param originBot 
 	 * @param weight
 	 * @param gravityType
 	 */
-	public MovingPerpendicularAntiGravityObject( double weight, double gravityType )
+	public MovingPerpendicularAntiGravityObject( IVirtualBot originBot, double weight, double gravityType )
 	{
 		super( weight, gravityType );
+		m_originBot = originBot;
 	}
 
 	public Vector2D getForceVector(Point2D.Double referent)
 	{
 		double distance = referent.distance(getPosition());
 		
-		double angle = m_movingObject.getHeadingRadians();
+		//double angle = m_movingObject.getHeadingRadians();
+		double angle = absbearing( referent, m_originBot.getPosition() );
 		// normalisation
 		angle = robocode.util.Utils.normalRelativeAngle( angle );
 		
@@ -62,6 +68,30 @@ public class MovingPerpendicularAntiGravityObject extends
 		}
 		
 		return vect;
+	}
+
+	public double absbearing( Point2D pt1, Point2D pt2 )
+	{
+		double xo = pt2.getX() - pt1.getX();
+		double yo = pt2.getY() - pt1.getY();
+		double h = pt1.distance( pt2 );
+		if( xo > 0 && yo > 0 )
+		{
+			return Math.asin( xo / h );
+		}
+		if( xo > 0 && yo < 0 )
+		{
+			return Math.PI - Math.asin( xo / h );
+		}
+		if( xo < 0 && yo < 0 )
+		{
+			return Math.PI + Math.asin( -xo / h );
+		}
+		if( xo < 0 && yo > 0 )
+		{
+			return 2.0 * Math.PI - Math.asin( -xo / h );
+		}
+		return 0;
 	}
 
 }

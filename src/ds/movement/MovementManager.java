@@ -141,7 +141,7 @@ public class MovementManager implements IMovementManager
 											m_owner.getY() - Math.cos( m_owner.getHeading() ) * m_owner.getVelocity() );
 				// tir hot
 				{
-					MovingPerpendicularAntiGravityObject bulletTracker = new MovingPerpendicularAntiGravityObject( m_BulletGravity, m_BulletGravityType );
+					MovingPerpendicularAntiGravityObject bulletTracker = new MovingPerpendicularAntiGravityObject( target, m_BulletGravity, m_BulletGravityType );
 					double angle = absbearing( targetPosition, myposition );
 					angle += (Math.random()*Math2.PI/16)-Math.PI/32;
 					IMovingObject vb = new VirtualBullet( null, null, target.getPosition(), angle, target.getLastShotPower() );
@@ -153,7 +153,7 @@ public class MovementManager implements IMovementManager
 				
 				// tir linear
 				{
-					MovingPerpendicularAntiGravityObject bulletTracker = new MovingPerpendicularAntiGravityObject( m_BulletGravity, m_BulletGravityType );
+					MovingPerpendicularAntiGravityObject bulletTracker = new MovingPerpendicularAntiGravityObject( target, m_BulletGravity, m_BulletGravityType );
 					double hotAngle = absbearing( targetPosition, myposition );
 					double angle = hotAngle + Math.asin(m_owner.getVelocity() / robocode.Rules.getBulletSpeed(target.getLastShotPower()) * Math.sin(m_owner.getHeadingRadians() - hotAngle));
 					angle += (Math.random()*Math2.PI/16)-Math.PI/32;
@@ -168,7 +168,7 @@ public class MovementManager implements IMovementManager
 				double distanceBetweenBullets = Math.tan( Math.abs(angleHot - angleLinear) ) * myposition.distance(targetPosition);
 				if( distanceBetweenBullets < 80 ) // 2*taille robot
 				{
-					MovingPerpendicularAntiGravityObject bulletTracker = new MovingPerpendicularAntiGravityObject( m_BulletGravity/3, m_BulletGravityType );
+					MovingPerpendicularAntiGravityObject bulletTracker = new MovingPerpendicularAntiGravityObject( target, m_BulletGravity/3, m_BulletGravityType );
 					double andleMedian = (angleHot + angleLinear)/2;
 					IMovingObject vb = new VirtualBullet( null, null, target.getPosition(), andleMedian, target.getLastShotPower() );
 					bulletTracker.setMovingObject( vb  );

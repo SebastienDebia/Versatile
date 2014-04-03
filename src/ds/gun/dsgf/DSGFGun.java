@@ -56,6 +56,8 @@ public class DSGFGun extends AbstractGun implements IDataSaver
 	 */
 	private int 				m_flood;
 
+	private double				m_lastPower;
+
 	/**
 	 * Constructeur
 	 * 
@@ -88,6 +90,7 @@ public class DSGFGun extends AbstractGun implements IDataSaver
 	 */
 	public void Act( double power )
 	{
+		m_lastPower = power;
 		IVirtualBot target;
 		try
 		{
@@ -190,7 +193,8 @@ public class DSGFGun extends AbstractGun implements IDataSaver
 		if( m_lastWave == null
 				|| m_lastWave.getLaunchTurn() <= getOwner().getTime() - m_flood
 				|| m_lastWave.getLaunchRound() < getOwner().getRoundNum()
-				|| bReelle )
+				|| bReelle
+				|| ( m_lastWave.getLaunchTurn() == getOwner().getTime() && m_lastWave.getLaunchRound() == getOwner().getRoundNum() ) )
 		{
 			BulletWave bw = new BulletWave( getOwner().getRoundNum(),
 					getOwner().getTime(), bReelle );
@@ -199,7 +203,7 @@ public class DSGFGun extends AbstractGun implements IDataSaver
 			double maxEscapeAngle = Math.asin( 8.0 / (20 - 3.0 * power) );
 			
 			// récupère le tableau des stats choisis par le gun pour pouvoir colorer les balles
-			SegmentationInfo si = new SegmentationInfo( getOwner(), target );
+			SegmentationInfo si = new SegmentationInfo( getOwner(), target, power );
 			// l'appel suivant donne l'index de la solution de tir, qu'il faut
 			// convertir en angle
 			double[] hitChances = m_tree.getSolutionSamples( si );
@@ -225,7 +229,12 @@ public class DSGFGun extends AbstractGun implements IDataSaver
 	 */
 	private void fireWave( IVirtualBot target, double power )
 	{
-		fireWave( target, power, false );
+		//fireWave( target, power, false );
+		fireWave( target, 0.4, false );
+		//fireWave( target, 1, false );
+		fireWave( target, 1.4, false );
+		//fireWave( target, 2, false );
+		fireWave( target, 2.2, false );
 	}
 
 	/*
@@ -243,12 +252,12 @@ public class DSGFGun extends AbstractGun implements IDataSaver
 		try
 		{
 			target = getTargetManager().getCurrentTarget();
-			SegmentationInfo si = new SegmentationInfo( getOwner(), target );
+			SegmentationInfo si = new SegmentationInfo( getOwner(), target, bulletPower );
 			// l'appel suivant donne l'index de la solution de tir, qu'il faut
 			// convertir en angle
 			FireIndex solutionIndex = m_tree.getSolution( si );
 			double relativeSolutionIndex = solutionIndex.getRelativeAngleIndex();
-			double maxEscapeAngle = Math.asin( 8.0 / (21.0 - 3.0 * bulletPower) );
+			double maxEscapeAngle = Math.asin( 8.0 / (20.0 - 3.0 * bulletPower) );
 			double step = 1 / (double)m_nbSamples;
 			angle = target.getLateralDirection() * relativeSolutionIndex * step * maxEscapeAngle;
 			angle = robocode.util.Utils.normalRelativeAngle( angle
@@ -292,7 +301,7 @@ public class DSGFGun extends AbstractGun implements IDataSaver
 		hud.setColor( Color.gray );
 		for( BulletWave bw : m_waves )
 		{
-			if( bw.estReelle() )
+			//if( bw.estReelle() )
 			{
 				for( IVirtualBullet vb : bw.getBullets() )
 				{
@@ -311,7 +320,7 @@ public class DSGFGun extends AbstractGun implements IDataSaver
 			hud.setColor( Color.red );
 			IVirtualBot target;
 			target = getTargetManager().getCurrentTarget();
-			SegmentationInfo si = new SegmentationInfo( getOwner(), target );
+			SegmentationInfo si = new SegmentationInfo( getOwner(), target, m_lastPower );
 			Vector<String> v = m_tree.getSolutionString( si );
 			int i = 0;
 			for( String s : v )

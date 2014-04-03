@@ -24,7 +24,7 @@ public class SegmentationInfo
 	public SegmentationInfo(VirtualBullet vb)
 	{
 		// distance robot/cible lors du tir
-		double distance = vb.getInitialDistance();
+		double distance = vb.getInitialDistance() / (20 - 3 * vb.getBulletPower());
 		// vitesse cible
 		double enemySpeed = vb.getInitialTargetVelocity();
 		// angle relatif ( indique si la cible etait plus ou moins
@@ -89,10 +89,11 @@ public class SegmentationInfo
 		Build(distance, enemySpeed, relativeHeading, turnRate, lateralVelocity, lateralAccell, advancingVelocity, distanceFromWall, distanceFromCorners, timeSinceLastVelocityChange, timeSinceLastAccel, timeSinceLastDeccel, timeSinceLastVelocityInversion, acceleration, frontDistanceFromWall );
 	}
 	
-	public SegmentationInfo(AdvancedRobot owner, IVirtualBot target)
+	public SegmentationInfo(AdvancedRobot owner, IVirtualBot target, double power)
 	{
 		// distance robot/cible lors du tir
-		double distance = target.getDistance();
+		//double distance = target.getDistance();
+		double distance = target.getDistance() / (20 - 3 * power);
 		// vitesse cible
 		double enemySpeed = target.getVelocity();
 		// angle relatif ( indique si la cible etait plus ou moins

@@ -56,11 +56,13 @@ public class GunManager implements IGunManager, Hud.Painter, IEventListener.Batt
 	AbstractGun 					m_selectedGun = null;
 	
 	/**
-	 * puissance de tir, calcul�e pour le tick suivant
+	 * puissance de tir, calcul�e pour le tick suivant
 	 */
 	private double					m_firePower;
 
 	private IDataSaver	m_dataSaverGun;
+
+	private HoTGun m_hotGUn;
 
 	/**
 	 * Constructeur construit les differents guns utilisés par le robot
@@ -73,8 +75,9 @@ public class GunManager implements IGunManager, Hud.Painter, IEventListener.Batt
 		// initialisation du tableau des guns
 		m_guns = new ArrayList<AbstractGun>();
 
+		m_hotGUn = new HoTGun( owner, targetManager );
 		if( ConstantManager.getInstance().getBooleanConstant( "gun.hot.active" ) )
-			m_guns.add( new HoTGun( owner, targetManager ) );
+			m_guns.add( m_hotGUn );
 		
 		if( ConstantManager.getInstance().getBooleanConstant( "gun.dsgfFast.active" ) )
 			m_guns.add( new DSGFGun( "Fast", owner, targetManager, false ) );
@@ -110,18 +113,13 @@ public class GunManager implements IGunManager, Hud.Painter, IEventListener.Batt
 			// tire
 			m_owner.setFire( m_firePower );
 
-			// affiche des stats sur la puissance de tir
-			/*try {
-				if( n > 0 )
-					medPower *= n;
-				medPower+=m_firePower;
-				n++;
-				medPower /= n;
-				System.out.println( "median power = " + medPower + " power = " + m_firePower + " dist = " + m_targetManager.getCurrentTarget().getDistance());
-			} catch (TargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
+			/*// affiche des stats sur la puissance de tir
+			if( n > 0 )
+				medPower *= n;
+			medPower+=m_firePower;
+			n++;
+			medPower /= n;
+			System.out.println( "median power = " + medPower );*/
 		}
 
 		if( m_guns.size() <= 0 )
@@ -144,6 +142,15 @@ public class GunManager implements IGunManager, Hud.Painter, IEventListener.Batt
 			if( ConstantManager.getInstance().getBooleanConstant( "debug" ) )
 				System.out.println( "Using " + m_lastSelectedGun.getName() );
 		}
+		
+		try
+		{
+			if( m_targetManager.getCurrentTarget().getEnergy() <= 0 )
+			{
+				m_selectedGun = m_hotGUn;
+			}
+		} catch (TargetException e1) {
+		}
 
 		// selectionne la puissance du tir
 		m_firePower = computeFirePower();
@@ -153,22 +160,22 @@ public class GunManager implements IGunManager, Hud.Painter, IEventListener.Batt
 		// ajoute un minuscule angle random pour contrer les bots qui ne bougent pas (energyDome)
 		double angle = fs.getAngle() + (Math.random()*Math2.PI/512)-Math.PI/256;
 		m_owner.setTurnGunRightRadians( angle );
-		
-		if( bShootingRound )
+
+		try
 		{
-			try
+			if( bShootingRound && m_targetManager.getCurrentTarget().getEnergy() > 0 )
 			{
-				for( AbstractGun gun : m_guns )
-				{
-					// tir d'une balle virtuelle pour les stats des guns
-					m_gunStats.virtualFire( gun, m_firePower );
-					// action possible de chaque gun lors d'un tir réell
-					gun.virtualFire( m_firePower );
-				}
+					for( AbstractGun gun : m_guns )
+					{
+						// tir d'une balle virtuelle pour les stats des guns
+						m_gunStats.virtualFire( gun, m_firePower );
+						// action possible de chaque gun lors d'un tir réell
+						gun.virtualFire( m_firePower );
+					}
 			}
-			catch( TargetException e )
-			{
-			}
+		}
+		catch( TargetException e )
+		{
 		}
 	}
 
@@ -195,7 +202,6 @@ public class GunManager implements IGunManager, Hud.Painter, IEventListener.Batt
 
 			double targetDistance = m_targetManager.getCurrentTarget().getDistance();
 			targetDistance = Math.min( 250/targetDistance, 1 ); // maximum at 250 px
-			//targetDistance = Math.min( 1+(250-targetDistance)/400, 1 ); // maximum at 250 px
 			double factor = Math.min( m_owner.getEnergy(), 25 ) * 1/25; // maximum at 25 hp
 			if ( m_owner.getEnergy() > 0.1 )
 				power = targetDistance*factor*robocode.Rules.MAX_BULLET_POWER;

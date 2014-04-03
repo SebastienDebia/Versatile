@@ -53,15 +53,15 @@ public class ConstantManager
 		registerConstant( "gun.linear.active", true );
 		registerConstant( "gun.linear.confidence", 0.97 );
 		registerConstant( "gun.dsgf.nbSamples", 36 );
-		registerConstant( "gun.dsgfFast.active", true );
+		registerConstant( "gun.dsgfFast.active", false );
 		registerConstant( "gun.dsgfFast.maxNodeLeafCount", 150 );
 		registerConstant( "gun.dsgfFast.minNodeLeafCount", 50 );
 		registerConstant( "gun.dsgfFast.flood", 2 );
 		registerConstant( "gun.dsgfFast.confidence", 1.0 );
 		registerConstant( "gun.dsgfSlow.active", true );
-		registerConstant( "gun.dsgfSlow.maxNodeLeafCount", 200 );
+		registerConstant( "gun.dsgfSlow.maxNodeLeafCount", 400 );
 		registerConstant( "gun.dsgfSlow.minNodeLeafCount", 50 );
-		registerConstant( "gun.dsgfSlow.flood", 5 );
+		registerConstant( "gun.dsgfSlow.flood", 7 );
 		registerConstant( "gun.dsgfSlow.confidence", 1.05 );
 		registerConstant( "gun.dsgfAWS.active", true );
 		registerConstant( "gun.dsgfAWS.maxNodeLeafCount", 150 );
@@ -81,7 +81,7 @@ public class ConstantManager
 		registerConstant( "movement.wallsGravity", 10.0);
 		registerConstant( "movement.wallsGravityType", 3.0);
 		registerConstant( "movement.BulletGravity", .20);
-		registerConstant( "movement.BulletGravityType", 1.5);
+		registerConstant( "movement.BulletGravityType", 1.3);
 		//registerConstant( "gun.dsgfFast.minNodeLeafCount", 20 );
 		//registerConstant( "gun.dsgfSlow.minNodeLeafCount", 50 );
 		//registerConstant( "gun.dsgfAWS.minNodeLeafCount", 30 );

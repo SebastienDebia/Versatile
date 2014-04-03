@@ -337,4 +337,12 @@ public class VirtualBullet implements IVirtualBullet
 	{
 		return m_lateralAccell;
 	}
+	
+	/**
+	 * 
+	 */
+	public double getBulletPower()
+	{
+		return m_power;
+	}
 }

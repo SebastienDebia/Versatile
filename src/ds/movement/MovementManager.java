@@ -186,6 +186,17 @@ public class MovementManager implements IMovementManager
 					vb.update();
 					m_agObjects.add( bulletTracker );
 				}*/
+				/*for( int i = -18; i < 18; ++i )
+				{
+					MovingPerpendicularAntiGravityObject bulletTracker = new MovingPerpendicularAntiGravityObject( target, m_BulletGravity/10, m_BulletGravityType );
+					double maxEscapeAngle = 2*Math.asin( 8.0 / (20 - 3.0 * target.getLastShotPower()) );
+					double step = maxEscapeAngle/36;
+					double angle = i*step+angleHot;
+					IMovingObject vb = new VirtualBullet( null, null, target.getPosition(), angle, target.getLastShotPower() );
+					bulletTracker.setMovingObject( vb  );
+					vb.update();
+					m_agObjects.add( bulletTracker );
+				}*/
 			}
 		}
 		catch( TargetException e1 )
@@ -215,6 +226,26 @@ public class MovementManager implements IMovementManager
 		for( AntiGravityObject ago : m_agObjects )
 		{
 			m_moveVector.add( ago.getForceVector( referent ) );
+		}
+		
+		// wall smoothing, pour éviter de rebondir sur le mur
+		{
+			if( m_moveVector.getR() > 150 )
+			{
+				m_moveVector.divide( m_moveVector.getR() );
+				m_moveVector.multiply( 150 );
+			}
+			Point2D.Double myMovePosition = new Point2D.Double( m_owner.getX() + m_moveVector.getX(), m_owner.getY() + m_moveVector.getY() );
+			Point2D.Double myposition = new Point2D.Double( m_owner.getX(), m_owner.getY() );
+			Point2D.Double orbitPosition = new Point2D.Double( m_owner.getBattleFieldWidth()/2, m_owner.getBattleFieldHeight()/2 );
+			IVirtualBot target;
+			try
+			{
+				target = m_targetManager.getCurrentTarget();
+				orbitPosition = target.getPosition();
+			} catch (TargetException e) { /*not an error*/ }
+			m_moveVector = new Vector2D( fastWallSmooth( orbitPosition, myposition, m_moveVector ) );
+			m_moveVector.substract( new Vector2D( myposition ) );
 		}
 		
 		// mouvement
@@ -312,6 +343,105 @@ public class MovementManager implements IMovementManager
 			hud.drawLine( X, Y, X2, Y2 );
 			hud.drawCircle( X, Y, 2);
 		}
+	}
+	
+	private Point2D.Double fastWallSmooth(Point2D.Double orbitCenter, Point2D.Double position, Vector2D vStick )
+	{
+		final double MARGIN = 30;
+		Point2D.Double projected = new Point2D.Double( position.x + vStick.getX(), position.y + vStick.getY() );
+		double direction = isLeft(position, orbitCenter, projected)?1:-1;
+		double distanceToOrbitCenter = orbitCenter.distance( position );
+		double stickLength = vStick.getR();
+	 
+		double fieldWidth = m_owner.getBattleFieldWidth(), fieldHeight = m_owner.getBattleFieldHeight();
+	 
+		double stick = Math.min(stickLength, distanceToOrbitCenter);
+		double stickSquared = square(stick);
+	 
+		int LEFT = -1, RIGHT = 1, TOP = 1, BOTTOM = -1;
+	 
+		int topOrBottomWall = 0;
+		int leftOrRightWall = 0;
+	 
+		//double desiredAngle = Utils.normalAbsoluteAngle(absoluteAngle(position, orbitCenter) - direction * Math.PI / 2.0);
+		//double desiredAngle = Utils.normalAbsoluteAngle(absbearing(position, initialProjectedPosition));
+		//Point2D.Double projected = projectPoint(position, desiredAngle, stick);
+		if(projected.x >= MARGIN && projected.x <= fieldWidth - MARGIN && projected.y >= MARGIN && projected.y <= fieldHeight - MARGIN)
+			return projected;
+	 
+		if(projected.x  > fieldWidth - MARGIN || position.x  > fieldWidth - stick - MARGIN) leftOrRightWall = RIGHT;
+		else if (projected.x < MARGIN || position.x < stick + MARGIN) leftOrRightWall = LEFT;
+	 
+		if(projected.y > fieldHeight - MARGIN || position.y > fieldHeight - stick - MARGIN) topOrBottomWall = TOP;
+		else if (projected.y < MARGIN || position.y < stick + MARGIN) topOrBottomWall = BOTTOM;
+	 
+		if(topOrBottomWall == TOP){
+			if(leftOrRightWall == LEFT){
+				if(direction > 0)
+					//smooth against top wall
+					return new Point2D.Double(position.x + direction * Math.sqrt(stickSquared - square(fieldHeight - MARGIN - position.y)), fieldHeight - MARGIN);
+				else
+					//smooth against left wall
+					return new Point2D.Double(MARGIN, position.y + direction * Math.sqrt(stickSquared - square(position.x - MARGIN)));
+	 
+			} else if(leftOrRightWall == RIGHT){
+				if(direction > 0)
+					//smooth against right wall
+					return new Point2D.Double(fieldWidth - MARGIN, position.y - direction * Math.sqrt(stickSquared - square(fieldWidth - MARGIN - position.x)));
+				else 
+					//smooth against top wall
+					return new Point2D.Double(position.x + direction * Math.sqrt(stickSquared - square(fieldHeight - MARGIN - position.y)), fieldHeight - MARGIN);
+	 
+			}
+			//Smooth against top wall
+			return new Point2D.Double(position.x + direction * Math.sqrt(stickSquared - square(fieldHeight - MARGIN - position.y)), fieldHeight - MARGIN); 
+		} else if(topOrBottomWall == BOTTOM){
+			if(leftOrRightWall == LEFT){
+				if(direction > 0)
+					//smooth against left wall
+					return new Point2D.Double(MARGIN, position.y + direction * Math.sqrt(stickSquared - square(position.x - MARGIN)));
+				else
+					//smooth against bottom wall
+					return new Point2D.Double(position.x - direction * Math.sqrt(stickSquared - square(position.y - MARGIN)), MARGIN);
+			} else if(leftOrRightWall == RIGHT){
+				if(direction > 0)
+					//smooth against bottom wall
+					return new Point2D.Double(position.x - direction * Math.sqrt(stickSquared - square(position.y - MARGIN)), MARGIN);
+				else
+					//smooth against right wall
+					return new Point2D.Double(fieldWidth - MARGIN, position.y - direction * Math.sqrt(stickSquared - square(fieldWidth - MARGIN - position.x)));
+	 
+			}
+			//Smooth against bottom wall
+			return new Point2D.Double(position.x - direction * Math.sqrt(stickSquared - square(position.y - MARGIN)), MARGIN);
+		}
+	 
+		if(leftOrRightWall == LEFT){
+			//smooth against left wall
+			return new Point2D.Double(MARGIN, position.y + direction * Math.sqrt(stickSquared - square(position.x - MARGIN)));
+		} else if(leftOrRightWall == RIGHT){
+			//smooth against right wall
+			return new Point2D.Double(fieldWidth - MARGIN, position.y - direction * Math.sqrt(stickSquared - square(fieldWidth - MARGIN - position.x)));
+		}
+	 
+		throw new RuntimeException("This code should be unreachable. position = " + position.x + ", " + position.y + "  orbitCenter = " + orbitCenter.x + ", " + orbitCenter.y + " direction = " + direction);
+	}
+	 
+	private static Point2D.Double projectPoint(Point2D.Double origin, double angle, double distance){
+		return new Point2D.Double(origin.x + distance * Math.sin(angle), origin.y + distance * Math.cos(angle));
+	}
+	 
+	private static double absoluteAngle(Point2D.Double origin, Point2D.Double target) {
+	    return Math.atan2(target.x - origin.x, target.y - origin.y);
+	}
+	 
+	private double square(double x){
+		return x*x;
+	}
+	
+	private boolean isLeft(Point2D.Double a, Point2D.Double b, Point2D.Double c)
+	{
+	     return ((b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x)) > 0;
 	}
 
 }

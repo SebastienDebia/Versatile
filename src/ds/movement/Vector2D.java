@@ -1,5 +1,7 @@
 package ds.movement;
 
+import java.awt.geom.Point2D;
+
 import ds.Math2;
 
 public class Vector2D
@@ -19,6 +21,16 @@ public class Vector2D
 	{
 		m_x = x;
 		m_y = y;
+	}
+
+	/**
+	 * Constructeur
+	 * @param point 
+	 */
+	public Vector2D(Point2D.Double point)
+	{
+		m_x = point.x;
+		m_y = point.y;
 	}
 	
 	/**

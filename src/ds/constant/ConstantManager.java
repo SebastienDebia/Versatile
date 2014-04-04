@@ -80,8 +80,8 @@ public class ConstantManager
 		registerConstant( "movement.targetGravityType", 1.5);
 		registerConstant( "movement.wallsGravity", .08);
 		registerConstant( "movement.wallsGravityType", 2.0);
-		registerConstant( "movement.BulletGravity", .20);
-		registerConstant( "movement.BulletGravityType", 1.3);
+		registerConstant( "movement.BulletGravity", .050);
+		registerConstant( "movement.BulletGravityType", 1.0);
 		//registerConstant( "gun.dsgfFast.minNodeLeafCount", 20 );
 		//registerConstant( "gun.dsgfSlow.minNodeLeafCount", 50 );
 		//registerConstant( "gun.dsgfAWS.minNodeLeafCount", 30 );

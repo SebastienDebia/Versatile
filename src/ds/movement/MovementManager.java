@@ -6,6 +6,7 @@ package ds.movement;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Vector;
 
 import com.sun.corba.se.impl.orbutil.closure.Constant;
@@ -15,7 +16,9 @@ import ds.Math2;
 import ds.PluggableRobot;
 import ds.Versatile;
 import ds.constant.ConstantManager;
+import ds.gun.BulletWave;
 import ds.gun.VirtualBullet;
+import ds.gun.dsgf.IndexedVirtualBullet;
 import ds.targeting.ITargetManager;
 import ds.targeting.IVirtualBot;
 import ds.targeting.TargetException;
@@ -65,6 +68,14 @@ public class MovementManager implements IMovementManager
 	private EnemyTargetManager 				m_enemyTargetManager;
 
 	/**
+	 * liste des vagues actuellement en l'air
+	 */
+	private ArrayList<BulletWave>			m_waves;
+    private static int BINS = 36; // attention une autre valeur risque de planter (36 en dur)
+    private double m_surfStats[] = new double[BINS];
+    private double m_surfStatsMax = 0;
+
+	/**
 	 * Constructeur
 	 * 
 	 * @param owner
@@ -72,6 +83,8 @@ public class MovementManager implements IMovementManager
 	 */
 	public MovementManager( Versatile owner, ITargetManager targetManager )
 	{
+		m_waves = new ArrayList<BulletWave>();
+		
 		m_moveVector = new Vector2D( 0, 0 );
 		
 		m_enemyTargetManager = new EnemyTargetManager( owner );
@@ -136,13 +149,14 @@ public class MovementManager implements IMovementManager
 				double angleHot = 0;
 				double angleLinear = 0;
 				Point2D.Double targetPosition = m_targetManager.getCurrentTarget().getPosition();
-				Point2D.Double myposition
+				Point2D.Double myPosition = m_owner.getPosition();
+				Point2D.Double myNextPosition
 					= new Point2D.Double(	m_owner.getX() - Math.sin( m_owner.getHeading() ) * m_owner.getVelocity(),
 											m_owner.getY() - Math.cos( m_owner.getHeading() ) * m_owner.getVelocity() );
 				// tir hot
 				{
 					MovingPerpendicularAntiGravityObject bulletTracker = new MovingPerpendicularAntiGravityObject( target, m_BulletGravity, m_BulletGravityType );
-					double angle = absbearing( targetPosition, myposition );
+					double angle = absbearing( targetPosition, myNextPosition );
 					angle += (Math.random()*Math2.PI/16)-Math.PI/32;
 					IMovingObject vb = new VirtualBullet( null, null, target.getPosition(), angle, target.getLastShotPower() );
 					bulletTracker.setMovingObject( vb  );
@@ -154,7 +168,7 @@ public class MovementManager implements IMovementManager
 				// tir linear
 				{
 					MovingPerpendicularAntiGravityObject bulletTracker = new MovingPerpendicularAntiGravityObject( target, m_BulletGravity, m_BulletGravityType );
-					double hotAngle = absbearing( targetPosition, myposition );
+					double hotAngle = absbearing( targetPosition, myNextPosition );
 					double angle = hotAngle + Math.asin(m_owner.getVelocity() / robocode.Rules.getBulletSpeed(target.getLastShotPower()) * Math.sin(m_owner.getHeadingRadians() - hotAngle));
 					angle += (Math.random()*Math2.PI/16)-Math.PI/32;
 					IMovingObject vb = new VirtualBullet( null, null, target.getPosition(), angle, target.getLastShotPower() );
@@ -165,7 +179,7 @@ public class MovementManager implements IMovementManager
 				}
 				
 				// si les 2 précédentes balles virtuelles sont proches, ajoute une 3ème entre les 2 pour eviter que le robot ne reste coincé au milieu et se les mange!
-				double distanceBetweenBullets = Math.tan( Math.abs(angleHot - angleLinear) ) * myposition.distance(targetPosition);
+				double distanceBetweenBullets = Math.tan( Math.abs(angleHot - angleLinear) ) * myNextPosition.distance(targetPosition);
 				if( distanceBetweenBullets < 80 ) // 2*taille robot
 				{
 					MovingPerpendicularAntiGravityObject bulletTracker = new MovingPerpendicularAntiGravityObject( target, m_BulletGravity/3, m_BulletGravityType );
@@ -186,17 +200,62 @@ public class MovementManager implements IMovementManager
 					vb.update();
 					m_agObjects.add( bulletTracker );
 				}*/
-				/*for( int i = -18; i < 18; ++i )
+				BulletWave bw = new BulletWave( m_owner.getRoundNum(),
+						m_owner.getTime(), true );
+				m_waves.add( bw );
+				for( int i = -18; i < 18; ++i )
 				{
-					MovingPerpendicularAntiGravityObject bulletTracker = new MovingPerpendicularAntiGravityObject( target, m_BulletGravity/10, m_BulletGravityType );
+					double bulletDanger = 2*((m_surfStats[i+18]/(m_surfStatsMax+0.01))-0.5); // entre -1 et 1
+					double bulletGravity = bulletDanger * m_BulletGravity;
 					double maxEscapeAngle = 2*Math.asin( 8.0 / (20 - 3.0 * target.getLastShotPower()) );
 					double step = maxEscapeAngle/36;
 					double angle = i*step+angleHot;
-					IMovingObject vb = new VirtualBullet( null, null, target.getPosition(), angle, target.getLastShotPower() );
-					bulletTracker.setMovingObject( vb  );
-					vb.update();
-					m_agObjects.add( bulletTracker );
-				}*/
+					{
+						VirtualBullet vb = new VirtualBullet( null, null, target.getPosition(), angle, target.getLastShotPower() );
+						vb.update();
+						bw.addBullet( vb );
+					}
+					if( /*Math.abs*/( bulletDanger ) > 0.7 )
+					{
+						VirtualBullet vb = new VirtualBullet( null, null, target.getPosition(), angle, target.getLastShotPower() );
+						vb.update();
+						MovingPerpendicularAntiGravityObject bulletTracker = new MovingPerpendicularAntiGravityObject( target, bulletGravity, m_BulletGravityType );
+						bulletTracker.setMovingObject( vb  );
+						m_agObjects.add( bulletTracker );
+					}
+				}
+				// calcul des statistiques
+				// pour chaque vague
+				for( BulletWave wave : m_waves )
+				{
+					int index = 0;
+					// pour chaque balle
+					for( VirtualBullet vb : wave.getBullets() )
+					{
+						// si la balle a touché
+						if( vb.getCurrentPosition().distance( myPosition ) < target.getSize() / 2 )
+						{
+							// si la balle n'avait pas encore touché avant ce turn
+							if( !vb.hasHit() )
+							{
+								m_surfStatsMax = 0;
+								for (int x = 0; x < BINS; x++)
+								{
+						            // for the spot bin that we were hit on, add 1;
+						            // for the bins next to it, add 1 / 2;
+						            // the next one, add 1 / 5; and so on...
+									m_surfStats[x] *= 20;
+						            m_surfStats[x] += (1.0 / (Math.pow(index - x, 2) + 1));
+						            m_surfStats[x] /= 20;
+						            if( m_surfStats[x] > m_surfStatsMax )
+						            	m_surfStatsMax = m_surfStats[x];
+						        }
+							}
+							vb.setHit( true );
+						}
+						index++;
+					}
+				}
 			}
 		}
 		catch( TargetException e1 )
@@ -220,6 +279,29 @@ public class MovementManager implements IMovementManager
 					m_agObjects.remove( mago );
 					i--;
 				}
+			}
+		}
+
+		for( BulletWave wave : m_waves )
+		{
+			for( VirtualBullet vb : wave.getBullets() )
+			{
+				vb.update();
+			}
+		}
+		// suppression des vagues perdues
+		Iterator<BulletWave> itBW = m_waves.iterator();
+		// pour chaque vague
+		while( itBW.hasNext() )
+		{
+			BulletWave wave = itBW.next();
+			VirtualBullet vb = wave.getBullets().get( 0 );
+			// si la balle a dépassé la cible + 30unités
+			if( vb.travelDistance() - 30 > vb.getStartPosition().distance(
+					m_owner.getPosition() ) )
+			{
+				// suppresion de la vague
+				itBW.remove();
 			}
 		}
 		

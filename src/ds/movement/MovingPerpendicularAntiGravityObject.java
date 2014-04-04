@@ -33,8 +33,8 @@ public class MovingPerpendicularAntiGravityObject extends
 	{
 		double distance = referent.distance(getPosition());
 		
-		//double angle = m_movingObject.getHeadingRadians();
-		double angle = absbearing( referent, m_originBot.getPosition() );
+		double angle = m_movingObject.getHeadingRadians();
+		//double angle = absbearing( referent, m_originBot.getPosition() );
 		// normalisation
 		angle = robocode.util.Utils.normalRelativeAngle( angle );
 		
@@ -61,7 +61,7 @@ public class MovingPerpendicularAntiGravityObject extends
 		double pow = Math.pow( distance, m_gravityType);
 		vect.multiply(getWeight()/pow);
 		
-		// si la balle est passée on réduit son impact sur la trajectoire
+		// si la balle est passï¿½e on rï¿½duit son impact sur la trajectoire
 		if( getStartPosition().distance(getPosition()) > getStartPosition().distance( referent ) + 15 )
 		{
 			vect.divide(10);

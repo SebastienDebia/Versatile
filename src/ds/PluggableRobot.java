@@ -271,4 +271,9 @@ public abstract class PluggableRobot extends AdvancedRobot
 		return s_instance;
 	}
 
+	public Point2D.Double getPosition()
+	{
+		return new Point2D.Double( getX(), getY() );
+	}
+
 }

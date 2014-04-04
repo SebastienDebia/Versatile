@@ -71,7 +71,7 @@ public class MovementManager implements IMovementManager
 	 * liste des vagues actuellement en l'air
 	 */
 	private ArrayList<BulletWave>			m_waves;
-    private static int BINS = 36; // attention une autre valeur risque de planter (36 en dur)
+    private static int BINS = 37; // attention une autre valeur risque de planter (37 en dur)
     private double m_surfStats[] = new double[BINS];
     private double m_surfStatsMax = 0;
 
@@ -83,6 +83,13 @@ public class MovementManager implements IMovementManager
 	 */
 	public MovementManager( Versatile owner, ITargetManager targetManager )
 	{
+
+		m_surfStatsMax = 0.5;
+		for (int x = 0; x < BINS; x++)
+		{
+			m_surfStats[x] = 0.5;
+        }
+		
 		m_waves = new ArrayList<BulletWave>();
 		
 		m_moveVector = new Vector2D( 0, 0 );
@@ -203,19 +210,21 @@ public class MovementManager implements IMovementManager
 				BulletWave bw = new BulletWave( m_owner.getRoundNum(),
 						m_owner.getTime(), true );
 				m_waves.add( bw );
-				for( int i = -18; i < 18; ++i )
+				double maxEscapeAngle = 2*Math.asin( 8.0 / (20 - 3.0 * target.getLastShotPower()) );
+				double direction = isLeft(target.getPosition(), myNextPosition, myPosition)?1:-1;
+				angleHot = absbearing( targetPosition, myNextPosition );
+				for( int i = -18; i <= 18; ++i )
 				{
 					double bulletDanger = 2*((m_surfStats[i+18]/(m_surfStatsMax+0.01))-0.5); // entre -1 et 1
 					double bulletGravity = bulletDanger * m_BulletGravity;
-					double maxEscapeAngle = 2*Math.asin( 8.0 / (20 - 3.0 * target.getLastShotPower()) );
-					double step = maxEscapeAngle/36;
-					double angle = i*step+angleHot;
+					double step = maxEscapeAngle/37;
+					double angle = direction*i*step+angleHot;
 					{
 						VirtualBullet vb = new VirtualBullet( null, null, target.getPosition(), angle, target.getLastShotPower() );
 						vb.update();
 						bw.addBullet( vb );
 					}
-					if( /*Math.abs*/( bulletDanger ) > 0.7 )
+					if( /*Math.abs*/( bulletDanger ) > 0.9 )
 					{
 						VirtualBullet vb = new VirtualBullet( null, null, target.getPosition(), angle, target.getLastShotPower() );
 						vb.update();
@@ -245,7 +254,7 @@ public class MovementManager implements IMovementManager
 						            // for the bins next to it, add 1 / 2;
 						            // the next one, add 1 / 5; and so on...
 									m_surfStats[x] *= 20;
-						            m_surfStats[x] += (1.0 / (Math.pow(index - x, 2) + 1));
+						            m_surfStats[x] += (10.0 / (Math.pow(index - x, 2) + 1));
 						            m_surfStats[x] /= 20;
 						            if( m_surfStats[x] > m_surfStatsMax )
 						            	m_surfStatsMax = m_surfStats[x];

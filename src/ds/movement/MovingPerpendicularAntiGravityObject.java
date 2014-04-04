@@ -33,8 +33,8 @@ public class MovingPerpendicularAntiGravityObject extends
 	{
 		double distance = referent.distance(getPosition());
 		
-		double angle = m_movingObject.getHeadingRadians();
-		//double angle = absbearing( referent, m_originBot.getPosition() );
+		//double angle = m_movingObject.getHeadingRadians();
+		double angle = absbearing( referent, m_originBot.getPosition() );
 		// normalisation
 		angle = robocode.util.Utils.normalRelativeAngle( angle );
 		

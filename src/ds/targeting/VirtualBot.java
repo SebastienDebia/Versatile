@@ -156,7 +156,7 @@ public class VirtualBot implements IVirtualBot
 			m_lastNonNullLateralVelocity = m_lateralVelocity;
 		
 		m_name = event.getName();
-		m_previousHeadingRadians = Utils.normalRelativeAngle( m_headingRadians-event.getHeadingRadians() );
+		m_previousHeadingRadians = m_headingRadians;
 		m_headingRadians = event.getHeadingRadians();
 		m_bearingRadians = event.getBearingRadians();
 		m_absoluteBearingRadians = getBearingRadians()
@@ -278,7 +278,7 @@ public class VirtualBot implements IVirtualBot
 	@Override
 	public double getTurnRate()
 	{
-		return m_headingRadians-m_previousHeadingRadians;
+		return Utils.normalRelativeAngle( m_headingRadians-m_previousHeadingRadians );
 	}
 
 	/*
@@ -334,11 +334,12 @@ public class VirtualBot implements IVirtualBot
 	@Override
 	public double getAcceleration()
 	{
-		if ( m_acceleration > 0 )
+		/*if ( m_acceleration > 0 )
 			return 1;
 		if ( m_acceleration < 0 )
 			return -1;
-		return 0;
+		return 0;*/
+		return m_acceleration;
 	}
 
 	/* (non-Javadoc)

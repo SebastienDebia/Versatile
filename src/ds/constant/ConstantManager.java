@@ -44,7 +44,7 @@ public class ConstantManager
 
 	public void loadBuiltIn()
 	{
-		registerConstant( "debug", true );
+		registerConstant( "debug", false );
 		registerConstant( "debugData", false );
 		registerConstant( "radar.focus", 5 );
 		registerConstant( "gun.selector.statsDepth", 100 );
@@ -61,7 +61,7 @@ public class ConstantManager
 		registerConstant( "gun.dsgfSlow.active", true );
 		registerConstant( "gun.dsgfSlow.maxNodeLeafCount", 400 );
 		registerConstant( "gun.dsgfSlow.minNodeLeafCount", 50 );
-		registerConstant( "gun.dsgfSlow.flood", 7 );
+		registerConstant( "gun.dsgfSlow.flood", 5 );
 		registerConstant( "gun.dsgfSlow.confidence", 1.05 );
 		registerConstant( "gun.dsgfAWS.active", true );
 		registerConstant( "gun.dsgfAWS.maxNodeLeafCount", 150 );
@@ -72,16 +72,16 @@ public class ConstantManager
 		registerConstant( "gun.dsgf.segmentationFactor", 10);
 		registerConstant( "gun.dsgf.densityEstimationWindow", 1 );
 		registerConstant( "movement.active", true );
-		registerConstant( "movement.cornerGravity", 5000.0);
+		registerConstant( "movement.cornerGravity", 10000.0);
 		registerConstant( "movement.cornerGravityType", 2.0);
 		registerConstant( "movement.centerGravity", 1.0);
 		registerConstant( "movement.centerGravityType", 1.0);
 		registerConstant( "movement.targetGravity", 30.0);
 		registerConstant( "movement.targetGravityType", 1.5);
-		registerConstant( "movement.wallsGravity", .08);
-		registerConstant( "movement.wallsGravityType", 2.0);
-		registerConstant( "movement.BulletGravity", .050);
-		registerConstant( "movement.BulletGravityType", 1.0);
+		registerConstant( "movement.wallsGravity", 10.0);
+		registerConstant( "movement.wallsGravityType", 3.0);
+		registerConstant( "movement.BulletGravity", .20);
+		registerConstant( "movement.BulletGravityType", 1.3);
 		//registerConstant( "gun.dsgfFast.minNodeLeafCount", 20 );
 		//registerConstant( "gun.dsgfSlow.minNodeLeafCount", 50 );
 		//registerConstant( "gun.dsgfAWS.minNodeLeafCount", 30 );

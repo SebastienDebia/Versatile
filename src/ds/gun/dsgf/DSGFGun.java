@@ -5,16 +5,11 @@ package ds.gun.dsgf;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import robocode.AdvancedRobot;
-import robocode.RobocodeFileOutputStream;
 import ds.Hud;
 import ds.constant.ConstantManager;
 import ds.gun.AbstractGun;
@@ -57,6 +52,8 @@ public class DSGFGun extends AbstractGun implements IDataSaver
 	private int 				m_flood;
 
 	private double				m_lastPower;
+	
+	private SegmentationInfo	m_lastSi; // debug
 
 	/**
 	 * Constructeur
@@ -204,6 +201,7 @@ public class DSGFGun extends AbstractGun implements IDataSaver
 			
 			// récupère le tableau des stats choisis par le gun pour pouvoir colorer les balles
 			SegmentationInfo si = new SegmentationInfo( getOwner(), target, power );
+			m_lastSi = si;
 			// l'appel suivant donne l'index de la solution de tir, qu'il faut
 			// convertir en angle
 			double[] hitChances = m_tree.getSolutionSamples( si );
@@ -298,6 +296,16 @@ public class DSGFGun extends AbstractGun implements IDataSaver
 	@Override
 	public void paint( Hud hud, long tick )
 	{
+		if( m_lastSi != null )
+		{
+			hud.setColor( Color.green );
+			for( int i = 0; i < m_lastSi.getDImCount(); ++i )
+			{
+				String s = m_lastSi.getDimensionName(i) + ": " + m_lastSi.getInfo(i);
+				hud.drawString( s, 500, 500-i*15 );
+			}
+		}
+		
 		hud.setColor( Color.gray );
 		for( BulletWave bw : m_waves )
 		{

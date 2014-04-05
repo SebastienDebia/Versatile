@@ -151,7 +151,7 @@ public class SegmentationInfo
 		//double nearestWallSpeed = vb.getNearestWallSpeed();
 		
 		// acceleration
-		double acceleration = target.getAcceleration();
+		double acceleration = target.getAcceleration() * Math.signum(enemySpeed - 0.000000000001);
 		
 		Build(distance, enemySpeed, relativeHeading, turnRate, lateralVelocity, lateralAccell, advancingVelocity, distanceFromWall, distanceFromCorners, timeSinceLastVelocityChange, timeSinceLastAccel, timeSinceLastDeccel, timeSinceLastVelocityInversion, acceleration, frontDistanceFromWall);
 	}

@@ -207,6 +207,7 @@ public class MovementManager implements IMovementManager
 					vb.update();
 					m_agObjects.add( bulletTracker );
 				}*/
+				//
 				BulletWave bw = new BulletWave( m_owner.getRoundNum(),
 						m_owner.getTime(), true );
 				m_waves.add( bw );

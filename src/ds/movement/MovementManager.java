@@ -17,6 +17,7 @@ import ds.PluggableRobot;
 import ds.Versatile;
 import ds.constant.ConstantManager;
 import ds.gun.BulletWave;
+import ds.gun.IVirtualBullet;
 import ds.gun.VirtualBullet;
 import ds.gun.dsgf.IndexedVirtualBullet;
 import ds.targeting.ITargetManager;
@@ -74,6 +75,10 @@ public class MovementManager implements IMovementManager
     private static int BINS = 37; // attention une autre valeur risque de planter (37 en dur)
     private double m_surfStats[] = new double[BINS];
     private double m_surfStatsMax = 0;
+    /**
+     * number of virtual bullets taken (vb which hit me)
+     */
+    private double m_vbTakens = 0;
 
 	/**
 	 * Constructeur
@@ -87,7 +92,7 @@ public class MovementManager implements IMovementManager
 		m_surfStatsMax = 0.5;
 		for (int x = 0; x < BINS; x++)
 		{
-			m_surfStats[x] = 0.5;
+			m_surfStats[x] = 0.0;
         }
 		
 		m_waves = new ArrayList<BulletWave>();
@@ -216,7 +221,7 @@ public class MovementManager implements IMovementManager
 				angleHot = absbearing( targetPosition, myNextPosition );
 				for( int i = -18; i <= 18; ++i )
 				{
-					double bulletDanger = 2*((m_surfStats[i+18]/(m_surfStatsMax+0.01))-0.5); // entre -1 et 1
+					double bulletDanger = m_surfStats[i+18]/(m_surfStatsMax+0.00001); // entre 0 et 1
 					double bulletGravity = bulletDanger * m_BulletGravity;
 					double step = maxEscapeAngle/37;
 					double angle = direction*i*step+angleHot;
@@ -225,45 +230,13 @@ public class MovementManager implements IMovementManager
 						vb.update();
 						bw.addBullet( vb );
 					}
-					if( /*Math.abs*/( bulletDanger ) > 0.9 )
+					if( ( bulletDanger ) > 0.95 )
 					{
 						VirtualBullet vb = new VirtualBullet( null, null, target.getPosition(), angle, target.getLastShotPower() );
 						vb.update();
 						MovingPerpendicularAntiGravityObject bulletTracker = new MovingPerpendicularAntiGravityObject( target, bulletGravity, m_BulletGravityType );
 						bulletTracker.setMovingObject( vb  );
 						m_agObjects.add( bulletTracker );
-					}
-				}
-				// calcul des statistiques
-				// pour chaque vague
-				for( BulletWave wave : m_waves )
-				{
-					int index = 0;
-					// pour chaque balle
-					for( VirtualBullet vb : wave.getBullets() )
-					{
-						// si la balle a touché
-						if( vb.getCurrentPosition().distance( myPosition ) < target.getSize() / 2 )
-						{
-							// si la balle n'avait pas encore touché avant ce turn
-							if( !vb.hasHit() )
-							{
-								m_surfStatsMax = 0;
-								for (int x = 0; x < BINS; x++)
-								{
-						            // for the spot bin that we were hit on, add 1;
-						            // for the bins next to it, add 1 / 2;
-						            // the next one, add 1 / 5; and so on...
-									m_surfStats[x] *= 20;
-						            m_surfStats[x] += (10.0 / (Math.pow(index - x, 2) + 1));
-						            m_surfStats[x] /= 20;
-						            if( m_surfStats[x] > m_surfStatsMax )
-						            	m_surfStatsMax = m_surfStats[x];
-						        }
-							}
-							vb.setHit( true );
-						}
-						index++;
 					}
 				}
 			}
@@ -299,17 +272,71 @@ public class MovementManager implements IMovementManager
 				vb.update();
 			}
 		}
+		// calcul des statistiques
+		// pour chaque vague
+		Point2D.Double myPosition = m_owner.getPosition();
+		for( BulletWave wave : m_waves )
+		{
+			int index = 0;
+			// pour chaque balle
+			for( VirtualBullet vb : wave.getBullets() )
+			{
+				// si la balle a touché
+				if( vb.getCurrentPosition().distance( myPosition ) < 40 )
+				{
+					vb.setHit( true );
+				}
+				index++;
+			}
+		}
 		// suppression des vagues perdues
 		Iterator<BulletWave> itBW = m_waves.iterator();
 		// pour chaque vague
 		while( itBW.hasNext() )
 		{
 			BulletWave wave = itBW.next();
-			VirtualBullet vb = wave.getBullets().get( 0 );
+			VirtualBullet vb1 = wave.getBullets().get( 0 );
 			// si la balle a dépassé la cible + 30unités
-			if( vb.travelDistance() - 30 > vb.getStartPosition().distance(
+			if( vb1.travelDistance() - 40 > vb1.getStartPosition().distance(
 					m_owner.getPosition() ) )
 			{
+				int firstHit = -1;
+				int lastHit = -1;
+				int i = 0;
+				// pour chaque balle
+				for( VirtualBullet vb : wave.getBullets() )
+				{
+					// si la balle a touché
+					if( vb.hasHit() )
+					{
+						if( firstHit == -1 )
+							firstHit = i;
+					}
+					else
+					{
+						if( firstHit != -1 && lastHit == -1 )
+							lastHit = i;
+					}
+					++i;
+				}
+				if( firstHit != -1 && lastHit == -1 )
+					lastHit = i-1;
+				if( firstHit != -1 && lastHit != -1 )
+				{
+					int index = (lastHit+firstHit)/2;
+					// met a jour les stats de surf
+					m_surfStatsMax = 0;
+					for (int x = 0; x < BINS; x++)
+					{
+			            // for the spot bin that we were hit on, add 1;
+			            // for the bins next to it, add 1 / 2;
+			            // the next one, add 1 / 5; and so on...
+						m_surfStats[x] = ds.Utils.rollingAvg(m_surfStats[x], (1.0 / (Math.pow(index - x, 2) + 1)), Math.min(m_vbTakens, 200), 1);
+			            if( m_surfStats[x] > m_surfStatsMax )
+			            	m_surfStatsMax = m_surfStats[x];
+			        }
+					m_vbTakens++;
+				}
 				// suppresion de la vague
 				itBW.remove();
 			}
@@ -321,7 +348,7 @@ public class MovementManager implements IMovementManager
 		}
 		
 		// wall smoothing, pour éviter de rebondir sur le mur
-		{
+		/*{
 			if( m_moveVector.getR() > 150 )
 			{
 				m_moveVector.divide( m_moveVector.getR() );
@@ -335,10 +362,12 @@ public class MovementManager implements IMovementManager
 			{
 				target = m_targetManager.getCurrentTarget();
 				orbitPosition = target.getPosition();
-			} catch (TargetException e) { /*not an error*/ }
+			}
+			catch (TargetException e) { //not an error
+			}
 			m_moveVector = new Vector2D( fastWallSmooth( orbitPosition, myposition, m_moveVector ) );
 			m_moveVector.substract( new Vector2D( myposition ) );
-		}
+		}*/
 		
 		// mouvement
 		if( m_moveVector.getR() <= 20 )
@@ -418,6 +447,23 @@ public class MovementManager implements IMovementManager
 	@Override
 	public void paint( Hud hud, long tick )
 	{
+		hud.setColor( Color.gray );
+		for( BulletWave bw : m_waves )
+		{
+			//if( bw.estReelle() )
+			{
+				for( IVirtualBullet vb : bw.getBullets() )
+				{
+					//float blue = (float)vb.getHitChance();
+					if ( vb.hasHit() )
+						hud.setColor( Color.red );
+					else
+						hud.setColor( new Color( 0x0f, 0x0f, 0x0f ) );
+					hud.drawFilledCircle( vb.getCurrentPosition().getX(), vb.getCurrentPosition().getY(), 2.5 );
+				}
+			}
+		}
+		
 		hud.setColor( Color.white );
 		hud.drawLine( m_owner.getX(), m_owner.getY(), m_owner.getX()
 				+ m_moveVector.getX(), m_owner.getY() + m_moveVector.getY() );
@@ -434,6 +480,16 @@ public class MovementManager implements IMovementManager
 			double Y2 = Y + forceVector.getY();
 			hud.drawLine( X, Y, X2, Y2 );
 			hud.drawCircle( X, Y, 2);
+		}
+
+		hud.setColor( Color.lightGray );
+		hud.drawLine( 50, 100, 50, 150 );
+		hud.drawLine( 50, 100, 180+50, 100 );
+		for( int i = 1; i < BINS; ++i )
+		{
+			double vprev = m_surfStats[i-1]/(m_surfStatsMax+0.0000001);
+			double vnext = m_surfStats[i]/(m_surfStatsMax+0.0000001);
+			hud.drawLine( 50+(i-1)*5, 100+vprev*50, 50+i*5, 100+vnext*50 );
 		}
 	}
 	

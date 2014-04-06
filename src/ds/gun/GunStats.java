@@ -216,22 +216,17 @@ public class GunStats implements Hud.Painter
 			if( vb.hasHit() )
 			{
 				Double score = m_scores.get( vb.getFiringGun() );
-				score = rollingAvg(score, 1, m_rollingDepth, 1);
+				score = ds.Utils.rollingAvg(score, 1, m_rollingDepth, 1);
 				m_scores.put( vb.getFiringGun(), score );
 			}
 			else
 			{
 				Double score = m_scores.get( vb.getFiringGun() );
-				score = rollingAvg(score, 0, m_rollingDepth, 1);
+				score = ds.Utils.rollingAvg(score, 0, m_rollingDepth, 1);
 				m_scores.put( vb.getFiringGun(), score );
 			}
 		}
 	}
-	
-	public static double rollingAvg(double value, double newEntry, double n, double weighting ) {
-	    return (value * n + newEntry * weighting)/(n + weighting);
-	} 
-
 
 	/*
 	 * (non-Javadoc)

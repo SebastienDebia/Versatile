@@ -2,11 +2,11 @@ package ds.targeting;
 
 import java.awt.geom.Point2D;
 
-import ds.DateTime;
-import ds.movement.IMovingObject;
 import robocode.AdvancedRobot;
-import robocode.Robot;
 import robocode.ScannedRobotEvent;
+import ds.DateTime;
+import ds.PositionLog;
+import ds.movement.IMovingObject;
 
 /**
  * Repr�sente un bot virtuel
@@ -174,4 +174,9 @@ public interface IVirtualBot extends IMovingObject, Cloneable
 	 * @return the current Date/Time
 	 */
 	public abstract DateTime getDateTime();
+	
+	/**
+	 * return the position log of the bot
+	 */
+	public abstract PositionLog getPositionLog();
 }

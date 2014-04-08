@@ -86,7 +86,13 @@ public class SegmentationInfo
 		// acceleration
 		double acceleration = vb.getAcceleration();
 		
-		Build(distance, enemySpeed, relativeHeading, turnRate, lateralVelocity, lateralAccell, advancingVelocity, distanceFromWall, distanceFromCorners, timeSinceLastVelocityChange, timeSinceLastAccel, timeSinceLastDeccel, timeSinceLastVelocityInversion, acceleration, frontDistanceFromWall );
+		// distance last 10
+		double distanceLast10 =  vb.getPositionLog().distanceSince(10);
+		
+		// distance last 30
+		double distanceLast30 =  vb.getPositionLog().distanceSince(30);
+		
+		Build(distance, enemySpeed, relativeHeading, turnRate, lateralVelocity, lateralAccell, advancingVelocity, distanceFromWall, distanceFromCorners, timeSinceLastVelocityChange, timeSinceLastAccel, timeSinceLastDeccel, timeSinceLastVelocityInversion, acceleration, frontDistanceFromWall, distanceLast10, distanceLast30 );
 	}
 	
 	public SegmentationInfo(AdvancedRobot owner, IVirtualBot target, double power)
@@ -152,8 +158,14 @@ public class SegmentationInfo
 		
 		// acceleration
 		double acceleration = target.getAcceleration() * Math.signum(enemySpeed - 0.000000000001);
+
+		// distance last 10
+		double distanceLast10 =  target.getPositionLog().distanceSince(10);
 		
-		Build(distance, enemySpeed, relativeHeading, turnRate, lateralVelocity, lateralAccell, advancingVelocity, distanceFromWall, distanceFromCorners, timeSinceLastVelocityChange, timeSinceLastAccel, timeSinceLastDeccel, timeSinceLastVelocityInversion, acceleration, frontDistanceFromWall);
+		// distance last 30
+		double distanceLast30 =  target.getPositionLog().distanceSince(30);
+		
+		Build(distance, enemySpeed, relativeHeading, turnRate, lateralVelocity, lateralAccell, advancingVelocity, distanceFromWall, distanceFromCorners, timeSinceLastVelocityChange, timeSinceLastAccel, timeSinceLastDeccel, timeSinceLastVelocityInversion, acceleration, frontDistanceFromWall, distanceLast10, distanceLast30);
 	}
 	
 	/**
@@ -171,9 +183,11 @@ public class SegmentationInfo
 	 * @param timeSinceLastAccel 
 	 * @param timeSinceLastVelocityInversion 
 	 * @param acceleration 
+	 * @param distanceLast30 
+	 * @param distanceLast10 
 	 */
 	public void Build( double distance, double enemySpeed,
-			double relativeHeading, double turnRate, double lateralVelocity, double lateralAccell, double advancingVelocity, double distanceFromWall, double distanceFromCorners, double timeSinceLastVelocityChange, double timeSinceLastAccel, double timeSinceLastDeccel, double timeSinceLastVelocityInversion, double acceleration, double frontDistanceFromWall)
+			double relativeHeading, double turnRate, double lateralVelocity, double lateralAccell, double advancingVelocity, double distanceFromWall, double distanceFromCorners, double timeSinceLastVelocityChange, double timeSinceLastAccel, double timeSinceLastDeccel, double timeSinceLastVelocityInversion, double acceleration, double frontDistanceFromWall, double distanceLast10, double distanceLast30)
 	{
 		m_names.clear();
 		
@@ -221,6 +235,12 @@ public class SegmentationInfo
 		
 		m_names.add("frontDistanceFromWall");
 		m_values.add(frontDistanceFromWall);
+		
+		m_names.add("distanceLast10");
+		m_values.add(distanceLast10);
+		
+		m_names.add("distanceLast30");
+		m_values.add(distanceLast30);
 	}
 
 	/**

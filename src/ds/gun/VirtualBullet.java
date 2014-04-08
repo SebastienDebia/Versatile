@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 
 import ds.Math2;
+import ds.PositionLog;
 import ds.targeting.IVirtualBot;
 
 /**
@@ -99,6 +100,11 @@ public class VirtualBullet implements IVirtualBullet
 	 */
 	private double m_lateralAccell;
 
+	/**
+	 * position log
+	 */
+	private PositionLog m_positionLog;
+
 
 	/**
 	 * Constructeur
@@ -130,6 +136,7 @@ public class VirtualBullet implements IVirtualBullet
 			m_timeSinceLastVelocityInversion = target.getTimeSinceLastVelocityInversion();
 			m_acceleration = target.getAcceleration();
 			m_lateralAccell = target.getLateralAccell();
+			m_positionLog = target.getPositionLog().clone();
 		}
 	}
 	
@@ -344,5 +351,10 @@ public class VirtualBullet implements IVirtualBullet
 	public double getBulletPower()
 	{
 		return m_power;
+	}
+
+	public PositionLog getPositionLog()
+	{
+		return m_positionLog;
 	}
 }

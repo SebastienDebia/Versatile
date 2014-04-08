@@ -2,15 +2,9 @@ package ds;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Double;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.zip.ZipOutputStream;
 
 import robocode.AdvancedRobot;
-import robocode.RobocodeFileOutputStream;
 import robocode.ScannedRobotEvent;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import ds.constant.ConstantManager;
 import ds.gun.GunManager;
 import ds.movement.IMovementManager;
@@ -82,6 +76,7 @@ public class Versatile extends PluggableRobot implements IVirtualBot
 	@Override
 	public void update()
 	{
+		m_positionLog.add( new Point2D.Double( getX(), getY() ) );
 	}
 
 	@Override
@@ -222,6 +217,15 @@ public class Versatile extends PluggableRobot implements IVirtualBot
 	{
 		return new DateTime( getRoundNum(), getTime() );
 	}
+	
+	/**
+	 * returns the position log of the bot
+	 */
+	@Override
+	public PositionLog getPositionLog()
+	{
+		return m_positionLog;
+	}
 
 
 	// /////////////////////////////////////////////
@@ -241,4 +245,10 @@ public class Versatile extends PluggableRobot implements IVirtualBot
 	 * taille d'un robot
 	 */
 	private static final double	ROBOT_SIZE	= 40;
+	
+	
+	/**
+	 * position log
+	 */
+	private PositionLog m_positionLog;
 }

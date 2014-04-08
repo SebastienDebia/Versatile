@@ -2,11 +2,12 @@ package ds.targeting;
 
 import java.awt.geom.Point2D;
 
-import ds.DateTime;
-import ds.Math2;
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
 import robocode.util.Utils;
+import ds.DateTime;
+import ds.Math2;
+import ds.PositionLog;
 
 public class VirtualBot implements IVirtualBot
 {
@@ -124,11 +125,17 @@ public class VirtualBot implements IVirtualBot
 	 * date and time of the last scan
 	 */
 	private DateTime m_dateTime;
+	
+	/**
+	 * position log
+	 */
+	private PositionLog m_positionLog;
 
 	public VirtualBot( String name )
 	{
 		m_name = name;
 		m_previousHeadingRadians = 0;
+		m_positionLog = new PositionLog( 30 );
 	}
 
 	// ///////////////////////////////
@@ -198,6 +205,8 @@ public class VirtualBot implements IVirtualBot
 			m_timeSinceLastDamageTaken = 0;
 		}
 		m_energy = event.getEnergy();
+		
+		m_positionLog.add( m_position );
 	}
 
 	@Override
@@ -446,6 +455,12 @@ public class VirtualBot implements IVirtualBot
 	public DateTime getDateTime()
 	{
 		return m_dateTime;
+	}
+
+	@Override
+	public PositionLog getPositionLog()
+	{
+		return m_positionLog;
 	}
 
 }

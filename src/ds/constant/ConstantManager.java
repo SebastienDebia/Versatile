@@ -52,20 +52,20 @@ public class ConstantManager
 		registerConstant( "gun.hot.confidence", 0.95 );
 		registerConstant( "gun.linear.active", true );
 		registerConstant( "gun.linear.confidence", 0.97 );
-		registerConstant( "gun.dsgf.nbSamples", 36 );
+		registerConstant( "gun.dsgf.nbSamples", 84 );
 		registerConstant( "gun.dsgfFast.active", false );
 		registerConstant( "gun.dsgfFast.maxNodeLeafCount", 150 );
 		registerConstant( "gun.dsgfFast.minNodeLeafCount", 50 );
 		registerConstant( "gun.dsgfFast.flood", 2 );
 		registerConstant( "gun.dsgfFast.confidence", 1.0 );
 		registerConstant( "gun.dsgfSlow.active", true );
-		registerConstant( "gun.dsgfSlow.maxNodeLeafCount", 800 ); // 400
-		registerConstant( "gun.dsgfSlow.minNodeLeafCount", 150 ); // 50
-		registerConstant( "gun.dsgfSlow.flood", 3 ); // 5
+		registerConstant( "gun.dsgfSlow.maxNodeLeafCount", 800 ); // 400 // 800
+		registerConstant( "gun.dsgfSlow.minNodeLeafCount", 150 ); // 50 // 150
+		registerConstant( "gun.dsgfSlow.flood", 5 ); // 5 // 3
 		registerConstant( "gun.dsgfSlow.confidence", 1.05 );
 		registerConstant( "gun.dsgfAWS.active", true );
-		registerConstant( "gun.dsgfAWS.maxNodeLeafCount", 150 );
-		registerConstant( "gun.dsgfAWS.minNodeLeafCount", 50 );
+		registerConstant( "gun.dsgfAWS.maxNodeLeafCount", 300 ); // 150
+		registerConstant( "gun.dsgfAWS.minNodeLeafCount", 100 ); // 50
 		registerConstant( "gun.dsgfAWS.flood", 0 );
 		registerConstant( "gun.dsgfAWS.confidence", 1.1 );
 		registerConstant( "gun.dsgf.maxChildNodeCount", 2);

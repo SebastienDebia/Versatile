@@ -215,7 +215,7 @@ public class DSGFGun extends AbstractGun implements IDataSaver
 								.getX(), getOwner().getY() ),
 						angleIndex, power, maxEscapeAngle, hitChances[i] );
 				m_lastWave.addBullet( ivb );
-				ivb.update(); // advance one tick
+				//ivb.update(); // advance one tick
 			}
 		}
 	}

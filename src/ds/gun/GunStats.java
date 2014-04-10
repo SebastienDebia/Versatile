@@ -103,7 +103,7 @@ public class GunStats implements Hud.Painter
 				.getCurrentTarget(), gun, position, fs.getAbsoluteAngle(),
 				power );
 		m_lastWave.addBullet( vb );
-		vb.update(); // advance one tick
+		//vb.update(); // advance one tick
 	}
 
 	/**

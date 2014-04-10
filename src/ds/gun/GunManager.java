@@ -163,7 +163,7 @@ public class GunManager implements IGunManager, Hud.Painter, IEventListener.Batt
 
 		try
 		{
-			if( bShootingRound && m_targetManager.getCurrentTarget().getEnergy() > 0 )
+			if( readyToShootNextTurn() && m_targetManager.getCurrentTarget().getEnergy() > 0 )
 			{
 					for( AbstractGun gun : m_guns )
 					{
@@ -179,9 +179,24 @@ public class GunManager implements IGunManager, Hud.Painter, IEventListener.Batt
 		}
 	}
 
+	private boolean readyToShootNextTurn()
+	{
+		double gunHeat = m_owner.getGunHeat() - 0.1; // TODO get real gun cooling rate? 
+		return m_firePower > 0
+				&& gunHeat <= 0
+				&& m_owner.getEnergy() > m_firePower
+				&& m_owner.getEnergy() > 0.1
+				&& m_targetManager.HasTarget()
+				&& Math.abs(m_owner.getGunTurnRemainingRadians()) <= robocode.Rules.GUN_TURN_RATE_RADIANS /*<= Math.PI/64*/;
+	}
+
 	private boolean readyToShoot()
 	{
-		return m_firePower > 0 && m_owner.getGunHeat() <= 0 && m_owner.getEnergy() > m_firePower && m_targetManager.HasTarget() 
+		return m_firePower > 0
+				&& m_owner.getGunHeat() <= 0
+				&& m_owner.getEnergy() > m_firePower
+				&& m_owner.getEnergy() > 0.1
+				&& m_targetManager.HasTarget() 
 				&& Math.abs(m_owner.getGunTurnRemainingRadians()) == 0 /*<= Math.PI/64*/;
 	}
 

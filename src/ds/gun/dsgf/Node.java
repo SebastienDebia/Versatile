@@ -524,7 +524,7 @@ public class Node implements Comparable<Node> {
 		result = sub1.getSamplesPic().m_nPicIndex
 				- sub2.getSamplesPic().m_nPicIndex;
 		result = Math.abs(result);
-		result = result * 3 / (double) m_nbSamples;
+		result = (5+(result * 1/(double)3))/6.0; // grosso modo entre 0.8 et 1
 		if (result > 1)
 			result = 1;
 

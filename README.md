@@ -17,3 +17,8 @@ The bot uses anti gravity movement, with anti gravity on walls, corners, the enn
 
 ## Rankings
 Used to be ranked ~120 in the 1v1 roborumble (http://literumble.appspot.com/Rankings?game=roborumble)
+
+## Demo
+![Versatile](https://user-images.githubusercontent.com/5497622/127932968-00062ac4-b040-4133-b2fa-bd543cee22fb.gif)
+
+![VersatileDebug](https://user-images.githubusercontent.com/5497622/127935437-f7d19ab7-aada-44bc-8b20-a8f8b1116273.gif)
